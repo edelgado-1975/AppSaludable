@@ -1,0 +1,19 @@
+{% extends "base.html" %} {% block content %}
+<h2>¡Un último paso!</h2>
+<p>
+  Para personalizar tu experiencia, por favor, dinos cuál es tu nivel de
+  condición física actual.
+</p>
+
+<form method="post">
+  {% csrf_token %}
+  <label for="level">Elige tu nivel:</label>
+  <select name="level" id="level" required>
+    <option value="principiante">Principiante</option>
+    <option value="intermedio">Intermedio</option>
+    <option value="avanzado">Avanzado</option>
+  </select>
+  <br /><br />
+  <button type="submit">Guardar y Empezar</button>
+</form>
+{% endblock %}

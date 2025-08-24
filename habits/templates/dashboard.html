@@ -1,0 +1,89 @@
+{% extends "base.html" %} {% block content %}
+<div class="row mb-4">
+  <div class="col">
+    <h1 class="display-5">Tu Panel de Control</h1>
+  </div>
+</div>
+
+<div class="row g-4">
+  <div class="col-md-4">
+    {% if streak > 0 %}
+    <div class="card text-center border-warning mb-4">
+      <div class="card-header bg-warning text-dark">
+        <strong>¡Racha Imparable!</strong>
+      </div>
+      <div class="card-body">
+        <h2 class="card-title display-4">🔥 {{ streak }} 🔥</h2>
+        <p class="card-text">día(s) seguidos. ¡No te detengas ahora!</p>
+      </div>
+    </div>
+    {% endif %} {% if tip %}
+    <div class="card">
+      <div class="card-header">
+        <i class="bi bi-lightbulb-fill"></i> Consejo del Día ({{
+        tip.get_category_display }})
+      </div>
+      <div class="card-body">
+        <p class="card-text">{{ tip.content }}</p>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- Columna para la Rutina del Día -->
+  <div class="col-md-8">
+    {% if completed_today %}
+    <div class="card text-center border-success">
+      <div class="card-header bg-success text-white">
+        <strong>¡Misión Cumplida!</strong>
+      </div>
+      <div class="card-body">
+        <h3 class="card-title">¡Felicidades!</h3>
+        <p class="card-text">
+          Ya completaste tu rutina de hoy. ¡Vuelve mañana para seguir con tu
+          racha!
+        </p>
+        <i
+          class="bi bi-check-circle-fill text-success"
+          style="font-size: 3rem"
+        ></i>
+      </div>
+    </div>
+    {% else %} {% if routine %}
+    <div class="card">
+      <div class="card-header">
+        <h3>
+          <i class="bi bi-person-walking"></i> Tu Rutina de Hoy:
+          {{routine.name}}
+        </h3>
+      </div>
+      <div class="card-body">
+        <h5 class="card-title">Nivel: {{ routine.get_level_display }}</h5>
+        <ul class="list-group list-group-flush">
+          {% for exercise in routine.exercises.all %}
+          <li class="list-group-item">
+            <strong>{{ exercise.name }}</strong>: {{ exercise.description }}
+          </li>
+          {% empty %}
+          <li class="list-group-item">Esta rutina aún no tiene ejercicios.</li>
+          {% endfor %}
+        </ul>
+      </div>
+      <div class="card-footer text-center">
+        <form method="post">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-primary btn-lg">
+            ¡Marcar como Completada!
+          </button>
+        </form>
+      </div>
+    </div>
+    {% else %}
+    <div class="alert alert-info">
+      No hay rutinas disponibles para tu nivel. Por favor, créalas en el panel
+      de administrador.
+    </div>
+    {% endif %} {% endif %}
+  </div>
+</div>
+{% endblock %}

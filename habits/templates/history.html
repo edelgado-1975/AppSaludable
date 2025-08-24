@@ -1,0 +1,37 @@
+{% extends "base.html" %} {% block content %}
+<div class="row">
+  <div class="col">
+    <h1 class="display-5 mb-4">Mi Historial de Progreso</h1>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-body">
+    {% if logs %}
+    <ul class="list-group list-group-flush">
+      {% for log in logs %}
+      <li
+        class="list-group-item d-flex justify-content-between align-items-center"
+      >
+        <div>
+          <strong class="d-block"
+            >{{ log.date|date:"l, d \d\e F \d\e Y" }}</strong
+          >
+          Completaste: <em>{{ log.completed_routine.name }}</em>
+        </div>
+        <span class="badge bg-success rounded-pill">Completado</span>
+      </li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <div class="text-center p-4">
+      <p class="lead">Aún no has completado ninguna rutina.</p>
+      <p>¡Completa tu rutina de hoy para empezar tu historial!</p>
+      <a href="{% url 'dashboard' %}" class="btn btn-primary"
+        >Volver al Panel</a
+      >
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
