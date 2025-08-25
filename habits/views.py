@@ -23,14 +23,23 @@ def dashboard(request):
     routine = Routine.objects.filter(level=user_level).first()
     today = timezone.now().date()
     
+    # --- ESTE ES EL CAMBIO MÁS IMPORTANTE ---
+    if request.method == 'POST':
+        # Volvemos a preguntar a la base de datos JUSTO AHORA, en el momento de enviar.
+        # ¿Existe un registro para este usuario y este día?
+        already_completed = DailyLog.objects.filter(user=request.user, date=today).exists()
+        
+        # Si NO existe, entonces y solo entonces, lo creamos.
+        if not already_completed:
+            return redirect('dashboard')
+            
+        # Si ya existe, simplemente no hacemos nada y dejamos que la página se recargue.
+    
+    # Esta parte ahora solo sirve para mostrar el estado de la página
     log_today = DailyLog.objects.filter(user=request.user, date=today).first()
     completed_today = log_today is not None
-
-    if request.method == 'POST':
-        if not log_today:
-            DailyLog.objects.create(user=request.user, date=today, completed_routine=routine)
-            return redirect('dashboard')
-
+        
+    # --- El resto del código se queda exactamente igual ---
     streak_count = 0
     completed_dates = DailyLog.objects.filter(user=request.user).values_list('date', flat=True)
     completed_dates_set = set(completed_dates)
@@ -46,14 +55,13 @@ def dashboard(request):
     if completed_today:
         streak_count += 1
     
-
     random_tip = Tip.objects.order_by('?').first()
 
     context = {
         'routine': routine,
         'completed_today': completed_today,
         'streak': streak_count,
-        'tip': random_tip, 
+        'tip': random_tip,
     }
     return render(request, 'dashboard.html', context)
 
