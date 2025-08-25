@@ -1,17 +1,13 @@
-
-
 from datetime import timedelta
 from django.shortcuts import render, redirect
-from django.contrib.auth.decorators import login_required
-from django.utils import timezone
-from .models import Routine, DailyLog, Profile, Tip
-from django.contrib.auth.forms import UserCreationForm
-from django.contrib.auth import login
 from django.urls import reverse_lazy
+from django.utils import timezone
 from django.views import generic
-from .forms import ProfileForm
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import login, logout
-from django.shortcuts import redirect
+from .models import Routine, DailyLog, Profile, Tip
+from .forms import ProfileForm
 
 
 @login_required
@@ -23,23 +19,16 @@ def dashboard(request):
     routine = Routine.objects.filter(level=user_level).first()
     today = timezone.now().date()
     
-    # --- ESTE ES EL CAMBIO MÁS IMPORTANTE ---
     if request.method == 'POST':
-        # Volvemos a preguntar a la base de datos JUSTO AHORA, en el momento de enviar.
-        # ¿Existe un registro para este usuario y este día?
         already_completed = DailyLog.objects.filter(user=request.user, date=today).exists()
         
-        # Si NO existe, entonces y solo entonces, lo creamos.
         if not already_completed:
+            DailyLog.objects.create(user=request.user, date=today, completed_routine=routine)
             return redirect('dashboard')
-            
-        # Si ya existe, simplemente no hacemos nada y dejamos que la página se recargue.
     
-    # Esta parte ahora solo sirve para mostrar el estado de la página
     log_today = DailyLog.objects.filter(user=request.user, date=today).first()
     completed_today = log_today is not None
         
-    # --- El resto del código se queda exactamente igual ---
     streak_count = 0
     completed_dates = DailyLog.objects.filter(user=request.user).values_list('date', flat=True)
     completed_dates_set = set(completed_dates)
@@ -66,7 +55,6 @@ def dashboard(request):
     return render(request, 'dashboard.html', context)
 
 
-
 @login_required
 def initial_evaluation(request):
     if request.method == 'POST':
@@ -78,7 +66,6 @@ def initial_evaluation(request):
     return render(request, 'initial_evaluation.html')
 
 
-
 class SignUpView(generic.CreateView):
     form_class = UserCreationForm
     success_url = reverse_lazy('initial_evaluation') 
@@ -88,7 +75,7 @@ class SignUpView(generic.CreateView):
         user = form.save()
         login(self.request, user)
         return super().form_valid(form)
-    
+
 
 @login_required
 def profile_view(request):
@@ -107,7 +94,6 @@ def profile_view(request):
     }
     return render(request, 'profile.html', context)
 
-
 @login_required
 def history_view(request):
     logs = DailyLog.objects.filter(user=request.user).order_by('-date')
@@ -116,6 +102,8 @@ def history_view(request):
         'logs': logs
     }
     return render(request, 'history.html', context)
+
+
 
 def logout_request(request):
     logout(request)
